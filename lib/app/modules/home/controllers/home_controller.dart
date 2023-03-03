@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:data_table_2/data_table_2.dart';
-import 'package:easy_audio_player/widgets/players/full_audio_player.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_dialog/flutter_custom_dialog.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:urban_sound_art_admin/app/data/firebase_provider.dart';
@@ -16,10 +15,6 @@ import 'package:urban_sound_art_admin/app/modules/home/views/widgets/player_widg
 
 import '../../../models/EventsModel.dart';
 import '../../../utils/colors.dart';
-
-import 'package:audio_service/audio_service.dart';
-import 'package:just_audio/just_audio.dart';
-
 
 class HomeController extends GetxController {
   FirebaseProvider _provider = FirebaseProvider();
@@ -41,7 +36,6 @@ class HomeController extends GetxController {
   TextEditingController eventTimeController = TextEditingController();
   TextEditingController eventStatusController = TextEditingController();
   TextEditingController eventVenueController = TextEditingController();
-
 
   TextEditingController announcementController = TextEditingController();
 
@@ -79,6 +73,12 @@ class HomeController extends GetxController {
       "Performance Link",
       style: Theme.of(Get.context!).textTheme.titleMedium,
     )),
+    DataColumn2(
+        fixedWidth: 100,
+        label: Text(
+          "Action",
+          style: Theme.of(Get.context!).textTheme.titleMedium,
+        )),
   ];
 
   List<DataRow2> eventRows = [];
@@ -121,8 +121,13 @@ class HomeController extends GetxController {
     DataColumn2(
         label:
             Text("Venue", style: Theme.of(Get.context!).textTheme.titleMedium)),
+    DataColumn2(
+        fixedWidth: 100,
+        label: Text(
+          "Action",
+          style: Theme.of(Get.context!).textTheme.titleMedium,
+        )),
   ];
-
 
   List<DataRow2> collabRows = [];
   List<DataColumn2> collabColumns = [
@@ -147,14 +152,14 @@ class HomeController extends GetxController {
         fixedWidth: 250),
     DataColumn2(
         label: Text(
-          "Status",
-          style: Theme.of(Get.context!).textTheme.titleMedium,
-        )),
+      "Status",
+      style: Theme.of(Get.context!).textTheme.titleMedium,
+    )),
     DataColumn2(
         label: Text(
-          "Action",
-          style: Theme.of(Get.context!).textTheme.titleMedium,
-        )),
+      "Action",
+      style: Theme.of(Get.context!).textTheme.titleMedium,
+    )),
   ];
   @override
   void onInit() async {
@@ -163,14 +168,17 @@ class HomeController extends GetxController {
         '${DateTime.now().month}/${DateTime.now().day}/${DateTime.now().year}';
     timeController.text = '${TimeOfDay.now().hour}:${TimeOfDay.now().minute}';
     loadArtists();
-    loadEvents();
+
     loadCollab();
     loadAnnouncement();
   }
 
-  loadAnnouncement()async{
-    await _provider.getAnnouncement().then((value) => announcementController.text = value);
+  loadAnnouncement() async {
+    await _provider
+        .getAnnouncement()
+        .then((value) => announcementController.text = value);
   }
+
   loadArtists() async {
     isLoading.value = true;
     await _provider.getArtists().then(
@@ -203,6 +211,18 @@ class HomeController extends GetxController {
                         style: Theme.of(Get.context!).textTheme.bodySmall,
                       ),
                     ),
+                    DataCell(
+                        Icon(
+                          Icons.delete,
+                          size: 20,
+                          color: Colors.red,
+                        ), onTap: () async {
+                      await FirebaseFirestore.instance
+                          .collection('artists')
+                          .doc(e.id)
+                          .delete();
+                      loadArtists();
+                    }),
                   ],
                 ),
               )
@@ -210,7 +230,6 @@ class HomeController extends GetxController {
         );
     isLoading.value = false;
   }
-
 
   loadCollab() async {
     isLoading.value = true;
@@ -220,15 +239,18 @@ class HomeController extends GetxController {
                 (e) => DataRow2(
                   cells: [
                     DataCell(
-                     /* Text(
+                        /* Text(
                         '${e.fileLink}',
                         style: Theme.of(Get.context!).textTheme.bodySmall,
                       ),*/
-                      //PlayerWidget( url: 'https://firebasestorage.googleapis.com/v0/b/codelab-assets.appspot.com/o/firebase-song.mp3?alt=media&token=44d4fc4f-20f6-40e0-998b-f9cf033a7d07', color: Colors.white,)
-                      PlayerWidget( url: '${e.fileLink}', color: Colors.white,)
-                      //   FullAudioPlayer(autoPlay: false, playlist: ConcatenatingAudioSource(children:[AudioSource.uri(Uri.parse(e.fileLink!),tag: MediaItem(
-                      //       id: '1', artUri: Uri.parse('https://picsum.photos/300/300'), title: 'Audio Title ', album: 'amazing album'))]))
-                    ),
+                        //PlayerWidget( url: 'https://firebasestorage.googleapis.com/v0/b/codelab-assets.appspot.com/o/firebase-song.mp3?alt=media&token=44d4fc4f-20f6-40e0-998b-f9cf033a7d07', color: Colors.white,)
+                        PlayerWidget(
+                      url: '${e.fileLink}',
+                      color: Colors.white,
+                    )
+                        //   FullAudioPlayer(autoPlay: false, playlist: ConcatenatingAudioSource(children:[AudioSource.uri(Uri.parse(e.fileLink!),tag: MediaItem(
+                        //       id: '1', artUri: Uri.parse('https://picsum.photos/300/300'), title: 'Audio Title ', album: 'amazing album'))]))
+                        ),
                     DataCell(
                       Text(
                         '${e.duration}',
@@ -248,66 +270,92 @@ class HomeController extends GetxController {
                       ),
                     ),
                     DataCell(
-                      e.status == "PENDING"?Row(
-                        children: [
-                          ElevatedButton(
-                            onPressed: () { 
-                              e.status = "APPROVED";
-                              _provider.updateCollab(e).then((value) => loadCollab());
-                            },
-                            child:Text('Approve',
-                            style: Theme.of(Get.context!).textTheme.bodySmall?.copyWith(color: Colors.green,fontSize: 12),
-                          )),
-                          SizedBox(width: 5,),
-                          ElevatedButton(
-                              onPressed: () async {
-                                print("collab we are in reject");
-                                FirebaseFirestore.instance
-                                    .collection("collab")
-                                    .doc(e.id.toString())
-                                    .update({
-                                  "status": "REJECTED",
-                                })
-                                    .then((value) {
-                                      print("Coloab is here");
-                                  loadCollab();
-                                })
-                                    .catchError((onError) {
-                                      print("collab $onError");
-                                });
-
-                              },
-                              child:Text('Reject',
-                                style: Theme.of(Get.context!).textTheme.bodySmall?.copyWith(color: Colors.red,fontSize: 12),
-                              )),
-                        ],
-                      ):
-                      e.status == "REJECTED"?Row(
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              // e.status = "APPROVED";
-                              // _provider.updateCollab(e).then((value) => loadCollab());
-                            },
-                            child:Text('Rejected',
-                            style: Theme.of(Get.context!).textTheme.bodySmall?.copyWith(color: Colors.green,fontSize: 12),
-                          )),
-                        ],
-                      ):
-                      e.status == "APPROVED"?Row(
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              // e.status = "APPROVED";
-                              // _provider.updateCollab(e).then((value) => loadCollab());
-                            },
-                            child:Text('Approved',
-                            style: Theme.of(Get.context!).textTheme.bodySmall?.copyWith(color: Colors.green,fontSize: 12),
-                          )),
-                        ],
-                      ):
-
-                      Container(),
+                      e.status == "PENDING"
+                          ? Row(
+                              children: [
+                                ElevatedButton(
+                                    onPressed: () {
+                                      e.status = "APPROVED";
+                                      _provider
+                                          .updateCollab(e)
+                                          .then((value) => loadCollab());
+                                    },
+                                    child: Text(
+                                      'Approve',
+                                      style: Theme.of(Get.context!)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                              color: Colors.green,
+                                              fontSize: 12),
+                                    )),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                ElevatedButton(
+                                    onPressed: () async {
+                                      print("collab we are in reject");
+                                      FirebaseFirestore.instance
+                                          .collection("collab")
+                                          .doc(e.id.toString())
+                                          .update({
+                                        "status": "REJECTED",
+                                      }).then((value) {
+                                        print("Coloab is here");
+                                        loadCollab();
+                                      }).catchError((onError) {
+                                        print("collab $onError");
+                                      });
+                                    },
+                                    child: Text(
+                                      'Reject',
+                                      style: Theme.of(Get.context!)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                              color: Colors.red, fontSize: 12),
+                                    )),
+                              ],
+                            )
+                          : e.status == "REJECTED"
+                              ? Row(
+                                  children: [
+                                    ElevatedButton(
+                                        onPressed: () {
+                                          // e.status = "APPROVED";
+                                          // _provider.updateCollab(e).then((value) => loadCollab());
+                                        },
+                                        child: Text(
+                                          'Rejected',
+                                          style: Theme.of(Get.context!)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                  color: Colors.green,
+                                                  fontSize: 12),
+                                        )),
+                                  ],
+                                )
+                              : e.status == "APPROVED"
+                                  ? Row(
+                                      children: [
+                                        ElevatedButton(
+                                            onPressed: () {
+                                              // e.status = "APPROVED";
+                                              // _provider.updateCollab(e).then((value) => loadCollab());
+                                            },
+                                            child: Text(
+                                              'Approved',
+                                              style: Theme.of(Get.context!)
+                                                  .textTheme
+                                                  .bodySmall
+                                                  ?.copyWith(
+                                                      color: Colors.green,
+                                                      fontSize: 12),
+                                            )),
+                                      ],
+                                    )
+                                  : Container(),
                     ),
                   ],
                 ),
@@ -317,64 +365,7 @@ class HomeController extends GetxController {
     isLoading.value = false;
   }
 
-  loadEvents() {
-    _provider.getEvents().then(
-          (value) => eventRows = value
-              .map<DataRow2>(
-                (e) => DataRow2(
-                  cells: [
-                    DataCell(Image.network('${e.imageLink}')),
-                    DataCell(
-                      Text(
-                        '${e.address}',
-                        style: Theme.of(Get.context!).textTheme.bodySmall,
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        '${e.buyLink}',
-                        style: Theme.of(Get.context!).textTheme.bodySmall,
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        '${e.cost}',
-                        style: Theme.of(Get.context!).textTheme.bodySmall,
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        '${e.date}',
-                        style: Theme.of(Get.context!).textTheme.bodySmall,
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        '${e.time}',
-                        style: Theme.of(Get.context!).textTheme.bodySmall,
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        '${e.status}',
-                        style: Theme.of(Get.context!).textTheme.bodySmall,
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        '${e.venue}',
-                        style: Theme.of(Get.context!).textTheme.bodySmall,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-              .toList(),
-        );
-    isLoading.value = false;
-  }
-
-  showUpdatAnnouncementDialog(context){
+  showUpdatAnnouncementDialog(context) {
     YYDialog? yyDialog;
     double sizedBoxSize = 16;
     Widget _header = Container(
@@ -409,16 +400,15 @@ class HomeController extends GetxController {
     );
 
     Widget _body = Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8.0),
+      padding: EdgeInsets.symmetric(horizontal: 8.0),
       child: TextFormField(
         maxLines: 3,
         controller: announcementController,
         decoration: InputDecoration(labelText: "Announcement"),
         validator: (value) =>
-        value!.isEmpty ? "Announcement should not be empty" : null,
+            value!.isEmpty ? "Announcement should not be empty" : null,
       ),
     );
-
 
     Widget _actions = Container(
       padding: EdgeInsets.only(top: 50, right: 20, bottom: 10),
@@ -506,8 +496,9 @@ class HomeController extends GetxController {
             TextFormField(
               controller: artistAddressController,
               decoration: InputDecoration(labelText: "Address/Venue/Origin"),
-              validator: (value) =>
-                  value!.isEmpty ? "Address/Venue/Origin should not be empty" : null,
+              validator: (value) => value!.isEmpty
+                  ? "Address/Venue/Origin should not be empty"
+                  : null,
             ),
             SizedBox(
               height: sizedBoxSize,
@@ -589,7 +580,6 @@ class HomeController extends GetxController {
               height: sizedBoxSize,
             ),
             TextFormField(
-
               controller: artistDescriptionController,
               decoration: InputDecoration(labelText: "Performance Link"),
               validator: (value) =>
@@ -883,11 +873,11 @@ class HomeController extends GetxController {
   }
 
   addEvent() async {
-    isLoading.value = true;
+    EasyLoading.show(status: 'Uploading Event ...');
     _provider
         .uploadEventImage(pickedImage!)
         .then((value) => _provider
-                .addEvent(
+            .addEvent(
               EventsModel(
                   imageLink: value,
                   buyLink: eventBuyLinkController.text,
@@ -898,9 +888,10 @@ class HomeController extends GetxController {
                   time: "",
                   venue: eventVenueController.text),
             )
-                .then((value) {
-              loadEvents();
-            }).catchError((error) => print("addEvent Exception : $error")))
+            .then((value) {
+              EasyLoading.dismiss();
+    })
+            .catchError((error) => print("addEvent Exception : $error")))
         .catchError((onError) => print("Exception $onError"));
   }
 }

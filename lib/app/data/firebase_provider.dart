@@ -69,17 +69,10 @@ class FirebaseProvider {
     return response;
   }
 
-  Future<List<EventsModel>> getEvents() async {
-    List<EventsModel> response = [];
-    await _firestore
-        .collection("events")
-        .get()
-        .then((value) => response = value.docs
-            .map<EventsModel>(
-                (e) => EventsModel.fromJson(e.data() as Map<String, dynamic>))
-            .toList())
-        .catchError((error) => print("Exception $error"));
-    return response;
+  Stream<List<EventsModel>> getEvents() {
+    return _firestore.collection("events").snapshots().map((event) => event.docs
+        .map((e) => EventsModel.fromJson(e.data() as Map<String, dynamic>))
+        .toList());
   }
 
   Future<bool> addEvent(EventsModel eventsModel) async {
