@@ -1,7 +1,9 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../controllers/home_controller.dart';
+
 class CollabView extends StatelessWidget {
   const CollabView({Key? key}) : super(key: key);
 
@@ -29,10 +31,10 @@ class CollabView extends StatelessWidget {
           Expanded(
             child: Card(
                 child: DataTable2(
-                  columns: controller.collabColumns,
-                  rows: controller.collabRows,
-                  dataRowHeight: 200,
-                )),
+              columns: controller.collabColumns,
+              rows: controller.collabRows,
+              dataRowHeight: 200,
+            )),
           ),
         ],
       ),

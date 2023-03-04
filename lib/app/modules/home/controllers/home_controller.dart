@@ -74,7 +74,7 @@ class HomeController extends GetxController {
       style: Theme.of(Get.context!).textTheme.titleMedium,
     )),
     DataColumn2(
-        fixedWidth: 100,
+        fixedWidth: 40,
         label: Text(
           "Action",
           style: Theme.of(Get.context!).textTheme.titleMedium,
@@ -122,7 +122,7 @@ class HomeController extends GetxController {
         label:
             Text("Venue", style: Theme.of(Get.context!).textTheme.titleMedium)),
     DataColumn2(
-        fixedWidth: 100,
+        fixedWidth: 40,
         label: Text(
           "Action",
           style: Theme.of(Get.context!).textTheme.titleMedium,
@@ -877,7 +877,7 @@ class HomeController extends GetxController {
     _provider
         .uploadEventImage(pickedImage!)
         .then((value) => _provider
-            .addEvent(
+                .addEvent(
               EventsModel(
                   imageLink: value,
                   buyLink: eventBuyLinkController.text,
@@ -888,10 +888,9 @@ class HomeController extends GetxController {
                   time: "",
                   venue: eventVenueController.text),
             )
-            .then((value) {
+                .then((value) {
               EasyLoading.dismiss();
-    })
-            .catchError((error) => print("addEvent Exception : $error")))
+            }).catchError((error) => print("addEvent Exception : $error")))
         .catchError((onError) => print("Exception $onError"));
   }
 }
