@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
 
 import '../../../utils/colors.dart';
@@ -11,10 +10,7 @@ class HomeView extends GetView<HomeController> {
     return Scaffold(
       body: Container(
         child: Row(
-          children: [
-            Expanded(flex: 15, child: sideNav()),
-            Expanded(flex: 85, child: page())
-          ],
+          children: [Expanded(flex: 15, child: sideNav()), Expanded(flex: 85, child: page())],
         ),
       ),
     );
@@ -45,7 +41,7 @@ class HomeView extends GetView<HomeController> {
         child: Column(
           children: [
             ListTile(
-              title: Text("Collaborations"),
+              title: Text("Sharesound"),
               onTap: () {
                 controller.selectedPageIndex.value = 0;
               },
@@ -77,9 +73,7 @@ class HomeView extends GetView<HomeController> {
               onTap: () {
                 controller.selectedPageIndex.value = 4;
               },
-              tileColor: controller.selectedPageIndex.value == 4
-                  ? Colors.white54
-                  : null,
+              tileColor: controller.selectedPageIndex.value == 4 ? Colors.white54 : null,
             )
           ],
         ),

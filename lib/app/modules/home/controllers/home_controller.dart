@@ -21,15 +21,19 @@ class HomeController extends GetxController {
   final selectedPageIndex = 0.obs;
   final isLoading = false.obs;
   final artistFormKey = GlobalKey<FormState>();
+  TextEditingController artistPreviousIamgeCotroelelr = TextEditingController();
   TextEditingController artistNameController = TextEditingController();
   TextEditingController artistAddressController = TextEditingController();
+  TextEditingController artistBioController = TextEditingController();
   TextEditingController artistDescriptionController = TextEditingController();
   TextEditingController dateController = TextEditingController();
   TextEditingController timeController = TextEditingController();
 
   //event
   final eventFormKey = GlobalKey<FormState>();
+  TextEditingController eventImageController = TextEditingController();
   TextEditingController eventBuyLinkController = TextEditingController();
+  TextEditingController eventTittleController = TextEditingController();
   TextEditingController eventAddressController = TextEditingController();
   TextEditingController eventCostController = TextEditingController();
   TextEditingController eventDateController = TextEditingController();
@@ -40,12 +44,7 @@ class HomeController extends GetxController {
   TextEditingController announcementController = TextEditingController();
 
   XFile? pickedImage;
-  List<Widget> pages = [
-    CollabView(),
-    ArtistsView(),
-    EventsView(),
-    SettingsView()
-  ];
+  List<Widget> pages = [CollabView(), ArtistsView(), EventsView(), SettingsView()];
 
   List<DataRow2> artistRows = [];
   List<DataColumn2> artistColumns = [
@@ -55,26 +54,32 @@ class HomeController extends GetxController {
           "Artist Name",
           style: Theme.of(Get.context!).textTheme.titleMedium,
         ),
-        fixedWidth: 150),
+        fixedWidth: 140),
     DataColumn2(
         label: Text(
           "Origin",
           style: Theme.of(Get.context!).textTheme.titleMedium,
         ),
-        fixedWidth: 150),
+        fixedWidth: 140),
+    DataColumn2(
+        label: Text(
+          "Bio",
+          style: Theme.of(Get.context!).textTheme.titleMedium,
+        ),
+        fixedWidth: 140),
     DataColumn2(
         label: Text(
           "Date & Time",
           style: Theme.of(Get.context!).textTheme.titleMedium,
         ),
-        fixedWidth: 150),
+        fixedWidth: 130),
     DataColumn2(
         label: Text(
       "Performance Link",
       style: Theme.of(Get.context!).textTheme.titleMedium,
     )),
     DataColumn2(
-        fixedWidth: 40,
+        fixedWidth: 80,
         label: Text(
           "Action",
           style: Theme.of(Get.context!).textTheme.titleMedium,
@@ -84,6 +89,12 @@ class HomeController extends GetxController {
   List<DataRow2> eventRows = [];
   List<DataColumn2> eventColumns = [
     DataColumn2(label: Text(""), fixedWidth: 100),
+    DataColumn2(
+        label: Text(
+          "Title",
+          style: Theme.of(Get.context!).textTheme.titleMedium,
+        ),
+        fixedWidth: 200),
     DataColumn2(
         label: Text(
           "Address",
@@ -107,22 +118,17 @@ class HomeController extends GetxController {
           "Date",
           style: Theme.of(Get.context!).textTheme.titleMedium,
         ),
-        fixedWidth: 150),
+        fixedWidth: 120),
     DataColumn2(
         label: Text(
           "Time",
           style: Theme.of(Get.context!).textTheme.titleMedium,
         ),
-        fixedWidth: 150),
+        fixedWidth: 120),
+    DataColumn2(label: Text("Status", style: Theme.of(Get.context!).textTheme.titleMedium), fixedWidth: 150),
+    DataColumn2(label: Text("Venue", style: Theme.of(Get.context!).textTheme.titleMedium)),
     DataColumn2(
-        label:
-            Text("Status", style: Theme.of(Get.context!).textTheme.titleMedium),
-        fixedWidth: 150),
-    DataColumn2(
-        label:
-            Text("Venue", style: Theme.of(Get.context!).textTheme.titleMedium)),
-    DataColumn2(
-        fixedWidth: 40,
+        fixedWidth: 100,
         label: Text(
           "Action",
           style: Theme.of(Get.context!).textTheme.titleMedium,
@@ -164,8 +170,7 @@ class HomeController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    dateController.text =
-        '${DateTime.now().month}/${DateTime.now().day}/${DateTime.now().year}';
+    dateController.text = '${DateTime.now().month}/${DateTime.now().day}/${DateTime.now().year}';
     timeController.text = '${TimeOfDay.now().hour}:${TimeOfDay.now().minute}';
     loadArtists();
 
@@ -174,9 +179,7 @@ class HomeController extends GetxController {
   }
 
   loadAnnouncement() async {
-    await _provider
-        .getAnnouncement()
-        .then((value) => announcementController.text = value);
+    await _provider.getAnnouncement().then((value) => announcementController.text = value);
   }
 
   loadArtists() async {
@@ -201,6 +204,12 @@ class HomeController extends GetxController {
                     ),
                     DataCell(
                       Text(
+                        '${e.bio ?? ''}',
+                        style: Theme.of(Get.context!).textTheme.bodySmall,
+                      ),
+                    ),
+                    DataCell(
+                      Text(
                         '${e.date}',
                         style: Theme.of(Get.context!).textTheme.bodySmall,
                       ),
@@ -212,17 +221,41 @@ class HomeController extends GetxController {
                       ),
                     ),
                     DataCell(
-                        Icon(
-                          Icons.delete,
-                          size: 20,
-                          color: Colors.red,
-                        ), onTap: () async {
-                      await FirebaseFirestore.instance
-                          .collection('artists')
-                          .doc(e.id)
-                          .delete();
-                      loadArtists();
-                    }),
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () async {
+                              artistPreviousIamgeCotroelelr.text = e.imageLink ?? '';
+                              artistNameController.text = e.name ?? '';
+                              artistAddressController.text = e.address ?? '';
+                              artistBioController.text = e.bio ?? '';
+                              artistDescriptionController.text = e.description ?? '';
+                              dateController.text = e.date ?? '';
+                              showAddArtistDialog(navigator!.context, true, e.id);
+                            },
+                            child: Icon(
+                              Icons.edit,
+                              size: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          GestureDetector(
+                            onTap: () async {
+                              await FirebaseFirestore.instance.collection('artists').doc(e.id).delete();
+                              loadArtists();
+                            },
+                            child: Icon(
+                              Icons.delete,
+                              size: 20,
+                              color: Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               )
@@ -276,18 +309,11 @@ class HomeController extends GetxController {
                                 ElevatedButton(
                                     onPressed: () {
                                       e.status = "APPROVED";
-                                      _provider
-                                          .updateCollab(e)
-                                          .then((value) => loadCollab());
+                                      _provider.updateCollab(e).then((value) => loadCollab());
                                     },
                                     child: Text(
                                       'Approve',
-                                      style: Theme.of(Get.context!)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(
-                                              color: Colors.green,
-                                              fontSize: 12),
+                                      style: Theme.of(Get.context!).textTheme.bodySmall?.copyWith(color: Colors.green, fontSize: 12),
                                     )),
                                 SizedBox(
                                   width: 5,
@@ -295,10 +321,7 @@ class HomeController extends GetxController {
                                 ElevatedButton(
                                     onPressed: () async {
                                       print("collab we are in reject");
-                                      FirebaseFirestore.instance
-                                          .collection("collab")
-                                          .doc(e.id.toString())
-                                          .update({
+                                      FirebaseFirestore.instance.collection("collab").doc(e.id.toString()).update({
                                         "status": "REJECTED",
                                       }).then((value) {
                                         print("Coloab is here");
@@ -309,12 +332,25 @@ class HomeController extends GetxController {
                                     },
                                     child: Text(
                                       'Reject',
-                                      style: Theme.of(Get.context!)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(
-                                              color: Colors.red, fontSize: 12),
+                                      style: Theme.of(Get.context!).textTheme.bodySmall?.copyWith(color: Colors.red, fontSize: 12),
                                     )),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () async {
+                                    FirebaseFirestore.instance.collection("collab").doc(e.id.toString()).delete().then((value) {
+                                      print("Coloab is here");
+                                      loadCollab();
+                                    }).catchError((onError) {
+                                      print("collab $onError");
+                                    });
+                                  },
+                                ),
                               ],
                             )
                           : e.status == "REJECTED"
@@ -327,13 +363,44 @@ class HomeController extends GetxController {
                                         },
                                         child: Text(
                                           'Rejected',
-                                          style: Theme.of(Get.context!)
-                                              .textTheme
-                                              .bodySmall
-                                              ?.copyWith(
-                                                  color: Colors.green,
-                                                  fontSize: 12),
+                                          style: Theme.of(Get.context!).textTheme.bodySmall?.copyWith(color: Colors.green, fontSize: 12),
                                         )),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    ElevatedButton(
+                                        onPressed: () async {
+                                          print("collab we are in reject");
+                                          FirebaseFirestore.instance.collection("collab").doc(e.id.toString()).update({
+                                            "status": "PENDING",
+                                          }).then((value) {
+                                            print("Coloab is here");
+                                            loadCollab();
+                                          }).catchError((onError) {
+                                            print("collab $onError");
+                                          });
+                                        },
+                                        child: Text(
+                                          'Reset',
+                                          style: Theme.of(Get.context!).textTheme.bodySmall?.copyWith(color: Colors.red, fontSize: 12),
+                                        )),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
+                                      ),
+                                      onPressed: () async {
+                                        FirebaseFirestore.instance.collection("collab").doc(e.id.toString()).delete().then((value) {
+                                          print("Coloab is here");
+                                          loadCollab();
+                                        }).catchError((onError) {
+                                          print("collab $onError");
+                                        });
+                                      },
+                                    ),
                                   ],
                                 )
                               : e.status == "APPROVED"
@@ -346,13 +413,44 @@ class HomeController extends GetxController {
                                             },
                                             child: Text(
                                               'Approved',
-                                              style: Theme.of(Get.context!)
-                                                  .textTheme
-                                                  .bodySmall
-                                                  ?.copyWith(
-                                                      color: Colors.green,
-                                                      fontSize: 12),
+                                              style: Theme.of(Get.context!).textTheme.bodySmall?.copyWith(color: Colors.green, fontSize: 12),
                                             )),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        ElevatedButton(
+                                            onPressed: () async {
+                                              print("collab we are in reject");
+                                              FirebaseFirestore.instance.collection("collab").doc(e.id.toString()).update({
+                                                "status": "PENDING",
+                                              }).then((value) {
+                                                print("Coloab is here");
+                                                loadCollab();
+                                              }).catchError((onError) {
+                                                print("collab $onError");
+                                              });
+                                            },
+                                            child: Text(
+                                              'Reset',
+                                              style: Theme.of(Get.context!).textTheme.bodySmall?.copyWith(color: Colors.red, fontSize: 12),
+                                            )),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        IconButton(
+                                          icon: Icon(
+                                            Icons.delete,
+                                            color: Colors.red,
+                                          ),
+                                          onPressed: () async {
+                                            FirebaseFirestore.instance.collection("collab").doc(e.id.toString()).delete().then((value) {
+                                              print("Coloab is here");
+                                              loadCollab();
+                                            }).catchError((onError) {
+                                              print("collab $onError");
+                                            });
+                                          },
+                                        ),
                                       ],
                                     )
                                   : Container(),
@@ -375,10 +473,7 @@ class HomeController extends GetxController {
         children: [
           Text(
             "Announcement",
-            style: Theme.of(context)
-                .textTheme
-                .headline6
-                ?.copyWith(color: AppColors.primary),
+            style: Theme.of(context).textTheme.headline6?.copyWith(color: AppColors.primary),
           ),
           SizedBox(
             height: 10,
@@ -405,8 +500,7 @@ class HomeController extends GetxController {
         maxLines: 3,
         controller: announcementController,
         decoration: InputDecoration(labelText: "Announcement"),
-        validator: (value) =>
-            value!.isEmpty ? "Announcement should not be empty" : null,
+        validator: (value) => value!.isEmpty ? "Announcement should not be empty" : null,
       ),
     );
 
@@ -445,7 +539,7 @@ class HomeController extends GetxController {
       ..widget(_actions).show();
   }
 
-  showAddArtistDialog(context) {
+  showAddArtistDialog(context, [update, id]) {
     YYDialog? yyDialog;
     double sizedBoxSize = 16;
     Widget _header = Container(
@@ -455,10 +549,7 @@ class HomeController extends GetxController {
         children: [
           Text(
             "Add Artist",
-            style: Theme.of(context)
-                .textTheme
-                .headline6
-                ?.copyWith(color: AppColors.primary),
+            style: Theme.of(context).textTheme.headline6?.copyWith(color: AppColors.primary),
           ),
           SizedBox(
             height: 10,
@@ -487,8 +578,7 @@ class HomeController extends GetxController {
             TextFormField(
               controller: artistNameController,
               decoration: InputDecoration(labelText: "Artist Name"),
-              validator: (value) =>
-                  value!.isEmpty ? "Please enter Artist Name" : null,
+              validator: (value) => value!.isEmpty ? "Please enter Artist Name" : null,
             ),
             SizedBox(
               height: sizedBoxSize,
@@ -496,9 +586,15 @@ class HomeController extends GetxController {
             TextFormField(
               controller: artistAddressController,
               decoration: InputDecoration(labelText: "Address/Venue/Origin"),
-              validator: (value) => value!.isEmpty
-                  ? "Address/Venue/Origin should not be empty"
-                  : null,
+              validator: (value) => value!.isEmpty ? "Address/Venue/Origin should not be empty" : null,
+            ),
+            SizedBox(
+              height: sizedBoxSize,
+            ),
+            TextFormField(
+              controller: artistBioController,
+              decoration: InputDecoration(labelText: "Bio"),
+              validator: (value) => value!.isEmpty ? "Bio should not be empty" : null,
             ),
             SizedBox(
               height: sizedBoxSize,
@@ -523,18 +619,13 @@ class HomeController extends GetxController {
                             data: ThemeData.light().copyWith(
                               primaryColor: Colors.black26,
                               accentColor: Colors.black26,
-                              colorScheme:
-                                  ColorScheme.light(primary: Colors.black26),
-                              buttonTheme: ButtonThemeData(
-                                  textTheme: ButtonTextTheme.primary),
+                              colorScheme: ColorScheme.light(primary: Colors.black26),
+                              buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
                             ),
                             child: child!,
                           );
                         },
-                      ).then((value) => value != null
-                          ? dateController.text =
-                              '${value.month}/${value.day}/${value.year}'
-                          : '${DateTime.now().month}/${DateTime.now().day}/${DateTime.now().year}');
+                      ).then((value) => value != null ? dateController.text = '${value.month}/${value.day}/${value.year}' : '${DateTime.now().month}/${DateTime.now().day}/${DateTime.now().year}');
                     },
                     controller: dateController,
                     decoration: InputDecoration(labelText: "Date"),
@@ -557,18 +648,13 @@ class HomeController extends GetxController {
                             data: ThemeData.light().copyWith(
                               primaryColor: Colors.black26,
                               accentColor: Colors.black26,
-                              colorScheme:
-                                  ColorScheme.light(primary: Colors.black26),
-                              buttonTheme: ButtonThemeData(
-                                  textTheme: ButtonTextTheme.primary),
+                              colorScheme: ColorScheme.light(primary: Colors.black26),
+                              buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
                             ),
                             child: child!,
                           );
                         },
-                      ).then((value) => value != null
-                          ? timeController.text =
-                              '${value.hour}:${value.minute}'
-                          : '${TimeOfDay.now().hour}:${TimeOfDay.now().minute}');
+                      ).then((value) => value != null ? timeController.text = '${value.hour}:${value.minute}' : '${TimeOfDay.now().hour}:${TimeOfDay.now().minute}');
                     },
                     controller: timeController,
                     decoration: InputDecoration(labelText: "Time"),
@@ -582,8 +668,7 @@ class HomeController extends GetxController {
             TextFormField(
               controller: artistDescriptionController,
               decoration: InputDecoration(labelText: "Performance Link"),
-              validator: (value) =>
-                  value!.isEmpty ? "Description should not be empty" : null,
+              validator: (value) => value!.isEmpty ? "Description should not be empty" : null,
             ),
             SizedBox(
               height: sizedBoxSize,
@@ -621,12 +706,17 @@ class HomeController extends GetxController {
           ),
           ElevatedButton(
             onPressed: () async {
+              if (update ?? false) {
+                await updateArtist(id);
+                yyDialog?.dismiss();
+                return;
+              }
               if (artistFormKey.currentState!.validate()) {
                 addArtist();
                 yyDialog?.dismiss();
               }
             },
-            child: Text("Add"),
+            child: Text(update ?? false ? "Update" : "Add"),
           ),
         ],
       ),
@@ -640,7 +730,7 @@ class HomeController extends GetxController {
       ..widget(_actions).show();
   }
 
-  showAddEventDialog(context) {
+  showAddEventDialog(context, [update, id]) {
     YYDialog? yyDialog;
     double sizedBoxSize = 16;
     Widget _header = Container(
@@ -650,10 +740,7 @@ class HomeController extends GetxController {
         children: [
           Text(
             "Add Event",
-            style: Theme.of(context)
-                .textTheme
-                .headline6
-                ?.copyWith(color: AppColors.primary),
+            style: Theme.of(context).textTheme.headline6?.copyWith(color: AppColors.primary),
           ),
           SizedBox(
             height: 10,
@@ -680,10 +767,17 @@ class HomeController extends GetxController {
         child: Column(
           children: [
             TextFormField(
+              controller: eventTittleController,
+              decoration: InputDecoration(labelText: "Title"),
+              validator: (value) => value!.isEmpty ? "Please enter Title" : null,
+            ),
+            SizedBox(
+              height: sizedBoxSize,
+            ),
+            TextFormField(
               controller: eventAddressController,
               decoration: InputDecoration(labelText: "Address"),
-              validator: (value) =>
-                  value!.isEmpty ? "Please enter Address" : null,
+              validator: (value) => value!.isEmpty ? "Please enter Address" : null,
             ),
             SizedBox(
               height: sizedBoxSize,
@@ -691,8 +785,7 @@ class HomeController extends GetxController {
             TextFormField(
               controller: eventBuyLinkController,
               decoration: InputDecoration(labelText: "Buy Link"),
-              validator: (value) =>
-                  value!.isEmpty ? "Buy Link should not be empty" : null,
+              validator: (value) => value!.isEmpty ? "Buy Link should not be empty" : null,
             ),
             SizedBox(
               height: sizedBoxSize,
@@ -700,8 +793,7 @@ class HomeController extends GetxController {
             TextFormField(
               controller: eventCostController,
               decoration: InputDecoration(labelText: "Cost"),
-              validator: (value) =>
-                  value!.isEmpty ? "Cost should not be empty" : null,
+              validator: (value) => value!.isEmpty ? "Cost should not be empty" : null,
             ),
             SizedBox(
               height: sizedBoxSize,
@@ -726,20 +818,15 @@ class HomeController extends GetxController {
                             data: ThemeData.light().copyWith(
                               primaryColor: Colors.black26,
                               accentColor: Colors.black26,
-                              colorScheme:
-                                  ColorScheme.light(primary: Colors.black26),
-                              buttonTheme: ButtonThemeData(
-                                  textTheme: ButtonTextTheme.primary),
+                              colorScheme: ColorScheme.light(primary: Colors.black26),
+                              buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
                             ),
                             child: child!,
                           );
                         },
-                      ).then((value) => value != null
-                          ? dateController.text =
-                              '${value.month}/${value.day}/${value.year}'
-                          : '${DateTime.now().month}/${DateTime.now().day}/${DateTime.now().year}');
+                      ).then((value) => value != null ? eventDateController.text = '${value.month}/${value.day}/${value.year}' : '${DateTime.now().month}/${DateTime.now().day}/${DateTime.now().year}');
                     },
-                    controller: dateController,
+                    controller: eventDateController,
                     decoration: InputDecoration(labelText: "Date"),
                   ),
                 ),
@@ -760,20 +847,15 @@ class HomeController extends GetxController {
                             data: ThemeData.light().copyWith(
                               primaryColor: Colors.black26,
                               accentColor: Colors.black26,
-                              colorScheme:
-                                  ColorScheme.light(primary: Colors.black26),
-                              buttonTheme: ButtonThemeData(
-                                  textTheme: ButtonTextTheme.primary),
+                              colorScheme: ColorScheme.light(primary: Colors.black26),
+                              buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
                             ),
                             child: child!,
                           );
                         },
-                      ).then((value) => value != null
-                          ? timeController.text =
-                              '${value.hour}:${value.minute}'
-                          : '${TimeOfDay.now().hour}:${TimeOfDay.now().minute}');
+                      ).then((value) => value != null ? eventTimeController.text = '${value.hour}:${value.minute}' : '${TimeOfDay.now().hour}:${TimeOfDay.now().minute}');
                     },
-                    controller: timeController,
+                    controller: eventTimeController,
                     decoration: InputDecoration(labelText: "Time"),
                   ),
                 ),
@@ -785,14 +867,12 @@ class HomeController extends GetxController {
             TextFormField(
               controller: eventStatusController,
               decoration: InputDecoration(labelText: "Status"),
-              validator: (value) =>
-                  value!.isEmpty ? "Status should not be empty" : null,
+              validator: (value) => value!.isEmpty ? "Status should not be empty" : null,
             ),
             TextFormField(
               controller: eventVenueController,
               decoration: InputDecoration(labelText: "Venue"),
-              validator: (value) =>
-                  value!.isEmpty ? "Venue should not be empty" : null,
+              validator: (value) => value!.isEmpty ? "Venue should not be empty" : null,
             ),
             SizedBox(
               height: sizedBoxSize,
@@ -830,12 +910,18 @@ class HomeController extends GetxController {
           ),
           ElevatedButton(
             onPressed: () async {
+              if (update ?? false) {
+                updateEvent(id);
+                yyDialog?.dismiss();
+
+                return;
+              }
               if (eventFormKey.currentState!.validate()) {
                 addEvent();
                 yyDialog?.dismiss();
               }
             },
-            child: Text("Add"),
+            child: Text(update ?? false ? "Update" : "Add"),
           ),
         ],
       ),
@@ -850,9 +936,36 @@ class HomeController extends GetxController {
   }
 
   Future<XFile?> chooseImage() async {
-    XFile? pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+    XFile? pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     return pickedFile;
+  }
+
+  updateArtist(id) async {
+    isLoading.value = true;
+    if (pickedImage != null) {
+      _provider
+          .uploadArtistImage(pickedImage!)
+          .then((value) => _provider
+                  .updateArtist(ArtistModel(
+                      id: id, imageLink: value, bio: artistBioController.text, name: artistNameController.text, address: artistAddressController.text, date: dateController.text, performanceLink: artistDescriptionController.text))
+                  .then((value) {
+                loadArtists();
+              }).catchError((error) => print("addArtist Exception : $error")))
+          .catchError((onError) => print("Exception $onError"));
+    } else {
+      await _provider
+          .updateArtist(ArtistModel(
+              id: id,
+              imageLink: artistPreviousIamgeCotroelelr.text,
+              bio: artistBioController.text,
+              name: artistNameController.text,
+              address: artistAddressController.text,
+              date: dateController.text,
+              performanceLink: artistDescriptionController.text))
+          .then((value) {
+        loadArtists();
+      }).catchError((error) => print("addArtist Exception : $error"));
+    }
   }
 
   addArtist() async {
@@ -860,12 +973,7 @@ class HomeController extends GetxController {
     _provider
         .uploadArtistImage(pickedImage!)
         .then((value) => _provider
-                .addArtist(ArtistModel(
-                    imageLink: value,
-                    name: artistNameController.text,
-                    address: artistAddressController.text,
-                    date: "",
-                    performanceLink: artistDescriptionController.text))
+                .addArtist(ArtistModel(imageLink: value, bio: artistBioController.text, name: artistNameController.text, address: artistAddressController.text, date: dateController.text, performanceLink: artistDescriptionController.text))
                 .then((value) {
               loadArtists();
             }).catchError((error) => print("addArtist Exception : $error")))
@@ -880,17 +988,62 @@ class HomeController extends GetxController {
                 .addEvent(
               EventsModel(
                   imageLink: value,
+                  title: eventTittleController.text,
                   buyLink: eventBuyLinkController.text,
                   address: eventAddressController.text,
-                  date: "",
+                  date: dateController.text,
                   cost: eventCostController.text,
                   status: eventStatusController.text,
-                  time: "",
+                  time: timeController.text,
                   venue: eventVenueController.text),
             )
                 .then((value) {
               EasyLoading.dismiss();
             }).catchError((error) => print("addEvent Exception : $error")))
         .catchError((onError) => print("Exception $onError"));
+  }
+
+  updateEvent(id) async {
+    EasyLoading.show(status: 'Updateing Event ...');
+    if (pickedImage != null) {
+      _provider
+          .uploadEventImage(pickedImage!)
+          .then((value) => _provider
+                  .updateEvent(
+                EventsModel(
+                    id: id,
+                    imageLink: value,
+                    title: eventTittleController.text,
+                    buyLink: eventBuyLinkController.text,
+                    address: eventAddressController.text,
+                    date: dateController.text,
+                    cost: eventCostController.text,
+                    status: eventStatusController.text,
+                    time: timeController.text,
+                    venue: eventVenueController.text),
+              )
+                  .then((value) {
+                EasyLoading.dismiss();
+              }).catchError((error) => print("addEvent Exception : $error")))
+          .catchError((onError) => print("Exception $onError"));
+    } else {
+      _provider
+          .updateEvent(
+        EventsModel(
+            id: id,
+            imageLink: eventImageController.text,
+            title: eventTittleController.text,
+            buyLink: eventBuyLinkController.text,
+            address: eventAddressController.text,
+            date: dateController.text,
+            cost: eventCostController.text,
+            status: eventStatusController.text,
+            time: timeController.text,
+            venue: eventVenueController.text),
+      )
+          .then((value) {
+        EasyLoading.dismiss();
+      }).catchError((error) => print("addEvent Exception : $error"));
+    }
   }
 }

@@ -5,22 +5,16 @@ class ArtistModel {
   String? address;
   String? date;
   String? description;
+  String? bio;
   String? performanceLink;
 
-  ArtistModel(
-      {this.id,
-        this.imageLink,
-        this.name,
-        this.address,
-        this.date,
-        this.description,
-      this.performanceLink
-      });
+  ArtistModel({this.id, this.imageLink, this.name, this.bio, this.address, this.date, this.description, this.performanceLink});
 
   ArtistModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     imageLink = json['imageLink'];
     name = json['name'];
+    bio = json['bio'];
     address = json['address'];
     date = json['date'];
     description = json['description'];
@@ -34,9 +28,9 @@ class ArtistModel {
     data['name'] = this.name;
     data['address'] = this.address;
     data['date'] = this.date;
+    data['bio'] = this.bio;
     data['description'] = this.description;
     data['performanceLink'] = this.performanceLink;
     return data;
   }
-
 }

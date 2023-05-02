@@ -8,21 +8,14 @@ class EventsModel {
   String? status;
   String? time;
   String? venue;
+  String? title;
 
-  EventsModel(
-      {this.id,
-      this.address,
-      this.buyLink,
-      this.cost,
-      this.date,
-      this.imageLink,
-      this.status,
-      this.time,
-      this.venue});
+  EventsModel({this.id, this.address, this.title, this.buyLink, this.cost, this.date, this.imageLink, this.status, this.time, this.venue});
 
   EventsModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     address = json['address'];
+    title = json['title'];
     buyLink = json['buyLink'];
     cost = json['cost'];
     date = json['date'];
@@ -36,6 +29,7 @@ class EventsModel {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['address'] = this.address;
+    data['title'] = this.title;
     data['buyLink'] = this.buyLink;
     data['cost'] = this.cost;
     data['date'] = this.date;

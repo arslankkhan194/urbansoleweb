@@ -26,6 +26,12 @@ class _EventsViewState extends State<EventsView> {
                   DataCell(Image.network('${e.imageLink}')),
                   DataCell(
                     Text(
+                      '${e.title ?? ''}',
+                      style: Theme.of(Get.context!).textTheme.bodySmall,
+                    ),
+                  ),
+                  DataCell(
+                    Text(
                       '${e.address}',
                       style: Theme.of(Get.context!).textTheme.bodySmall,
                     ),
@@ -67,16 +73,44 @@ class _EventsViewState extends State<EventsView> {
                     ),
                   ),
                   DataCell(
-                      Icon(
-                        Icons.delete,
-                        size: 20,
-                        color: Colors.red,
-                      ), onTap: () async {
-                    FirebaseFirestore.instance
-                        .collection('events')
-                        .doc(e.id)
-                        .delete();
-                  }),
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () async {
+                            HomeController controller = Get.find<HomeController>();
+                            controller.eventImageController.text = e.imageLink ?? '';
+                            controller.eventTittleController.text = e.title ?? '';
+                            controller.eventAddressController.text = e.address ?? '';
+                            controller.eventBuyLinkController.text = e.buyLink ?? '';
+                            controller.eventCostController.text = e.cost ?? '';
+                            controller.eventStatusController.text = e.status ?? '';
+                            controller.eventVenueController.text = e.venue ?? '';
+                            controller.eventDateController.text = e.date ?? '';
+                            controller.eventTimeController.text = e.time ?? '';
+                            controller.showAddEventDialog(context, true, e.id);
+                          },
+                          child: Icon(
+                            Icons.edit,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            FirebaseFirestore.instance.collection('events').doc(e.id).delete();
+                          },
+                          child: Icon(
+                            Icons.delete,
+                            size: 20,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             )
