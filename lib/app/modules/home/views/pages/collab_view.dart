@@ -18,7 +18,7 @@ class CollabView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Collaboration",
+                "Sharesound",
                 style: Theme.of(context).textTheme.headline3,
               ),
               ElevatedButton(

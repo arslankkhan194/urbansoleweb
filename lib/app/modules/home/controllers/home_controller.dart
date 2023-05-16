@@ -618,8 +618,7 @@ class HomeController extends GetxController {
                           return Theme(
                             data: ThemeData.light().copyWith(
                               primaryColor: Colors.black26,
-                              accentColor: Colors.black26,
-                              colorScheme: ColorScheme.light(primary: Colors.black26),
+                              colorScheme: ColorScheme.light(primary: Colors.black26, secondary: Colors.black26),
                               buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
                             ),
                             child: child!,
@@ -647,8 +646,7 @@ class HomeController extends GetxController {
                           return Theme(
                             data: ThemeData.light().copyWith(
                               primaryColor: Colors.black26,
-                              accentColor: Colors.black26,
-                              colorScheme: ColorScheme.light(primary: Colors.black26),
+                              colorScheme: ColorScheme.light(primary: Colors.black26, secondary: Colors.black26),
                               buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
                             ),
                             child: child!,
@@ -817,8 +815,7 @@ class HomeController extends GetxController {
                           return Theme(
                             data: ThemeData.light().copyWith(
                               primaryColor: Colors.black26,
-                              accentColor: Colors.black26,
-                              colorScheme: ColorScheme.light(primary: Colors.black26),
+                              colorScheme: ColorScheme.light(primary: Colors.black26, secondary: Colors.black26),
                               buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
                             ),
                             child: child!,
@@ -846,8 +843,7 @@ class HomeController extends GetxController {
                           return Theme(
                             data: ThemeData.light().copyWith(
                               primaryColor: Colors.black26,
-                              accentColor: Colors.black26,
-                              colorScheme: ColorScheme.light(primary: Colors.black26),
+                              colorScheme: ColorScheme.light(primary: Colors.black26, secondary: Colors.black26),
                               buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
                             ),
                             child: child!,

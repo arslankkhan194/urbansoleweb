@@ -10,18 +10,24 @@ class HomeView extends GetView<HomeController> {
     return Scaffold(
       body: Container(
         child: Row(
-          children: [Expanded(flex: 15, child: sideNav()), Expanded(flex: 85, child: page())],
+          children: [
+            Expanded(
+              flex: 15,
+              child: sideNav(context),
+            ),
+            Expanded(flex: 85, child: page())
+          ],
         ),
       ),
     );
   }
 
-  sideNav() {
+  sideNav(context) {
     return Container(
       color: AppColors.blackForeground,
       child: Column(
         children: [
-          SizedBox(height: 100, child: logo()),
+          Container(width: MediaQuery.of(context).size.width * .15, color: Colors.black, height: 100, child: logo()),
           Divider(),
           Obx(() => navItems()),
         ],
@@ -30,7 +36,10 @@ class HomeView extends GetView<HomeController> {
   }
 
   logo() {
-    return FlutterLogo();
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Image.asset('assets/logo.jpeg'),
+    );
   }
 
   navItems() {
